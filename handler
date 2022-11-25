@@ -1,0 +1,46 @@
+//trigger to allow only one contact to get added on an account
+public class trgController
+{
+    public static void trgMethod(Map<Id,Contact> newMap,Map<Id,Contact> oldMap)
+    {
+        Set<Id> accIds = new Set<Id>();
+
+        if(newMap != null)
+        {
+            for(Contact newCon : newMap.values())
+            {
+                if(oldMap != null)
+                {
+                    Contact oldCon = oldMap.get(newCon.Id);
+                    
+                    if(oldCon.AccountId != newCon.AccountId)
+                    {
+                        accIds.add(newCon.AccountId);
+                        accIds.add(oldCon.AccountId);
+                    }
+                    else
+                    {
+                        accIds.add(newCon.AccountId);
+                    }
+                }
+                else
+                {
+                    accIds.add(newCon.AccountId);
+                }
+            }
+        }
+
+        Integer noC = [Select count() from Contact where AccountId IN : accIds];
+        
+        if(newMap != null)
+        {
+            for(Contact con : newMap.values())
+            {
+                if(noC > 1)
+                {
+                    con.addError('You cannot insert this contact on account because this account already has one contact');
+                }
+            }
+        }
+    }
+}
